@@ -3,7 +3,7 @@
 Script para la gestión de usuarios(no finalizado)
 
 (previo, luego orientado a obj)
-dict y compresión de listas para recorrer
+compresión de listas para recorrer
 usar expresiones regulares para limitar las contraseñas a letras ASCII y num
 con simbolos comunes, y el nombre,
 excepciones para controlar no duplicidad usuarios
