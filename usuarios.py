@@ -11,6 +11,7 @@ class Usuario:
     def __init__(self, nombre, contrasena):
         self.nombre = nombre
         self.contrasena = contrasena
+        self.registrar_usuario()
 
     def registrar_usuario(self):
         with open('usuarios.csv', mode='a', newline='') as users_file:
@@ -25,15 +26,13 @@ class Usuario:
                     dict_1[v[0]] = v[1]
 
                 match = re.search('^[\\w]+$', self.contrasena)
-                match = re.search('^[\\w]+$', self.contrasena)
                 if match:
-                    if self.nombre not in dict_1.keys():
-                        writer.writerow({'Nombre': self.nombre, 'Contraseña': self.contrasena})
-                        return 0
-                    else:
-                        return 1
+                    (writer.writerow({'Nombre': self.nombre, 'Contraseña': self.contrasena}),
+                     print(f'{self.nombre},Te has registrado correctamente')) \
+                        if self.nombre not in dict_1.keys() else \
+                        print('Ya existe ese usuario, por favor, elige otro nombre o inicia sesión.')
                 else:
-                    return 2
+                    print('Las contraseñas están limitadas a carácteres unicode')
 
     @staticmethod
     def iniciar_sesion(nombre, contrasena):
@@ -44,11 +43,10 @@ class Usuario:
             for usuario in csv_reader:
                 credenciales = list(usuario.values())
                 if nombre == credenciales[0] and contrasena == credenciales[1]:
-                    return True # Si las credenciales son correctas
+                    print('Credenciales correctas')
                     break
             else:
-                return False # Si las credenciales son incorrectas
-
+                print('Credenciales incorrectas')
 
 
 # Nota, si el archivo csv no tiene una linea nueva vacia, habrá errores. No debe ocurrir ningún error si no se modifica manualmente.
