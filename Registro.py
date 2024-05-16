@@ -12,8 +12,7 @@ class Libro:
 class GestorLecturas:
     def __init__(self, data):
         # Crear diccionadrio
-        self.data = [{'Titulo': '', 'Autor': '', 'Genero': '', 'Descripcion': '', 'Editorial': ''},
-                     {'Titulo': '', 'Autor': '', 'Genero': '', 'Descripcion': '', 'Editorial': ''}]
+        self.data = [{'Titulo': '', 'Autor': '', 'Genero': '', 'Descripcion': '', 'Editorial': ''}]
 
         # Crear dataframe desde el diccionario
         self.df = pd.DataFrame(self.data)
@@ -26,5 +25,9 @@ class GestorLecturas:
                        'Editorial': libro.editorial}
 
         self.df = self.df.append(libro_nuevo)
+
+        with open('libros.txt', 'w') as archivo_libros:
+            archivo_libros.write(self.df)
+
         return f"El libro '{libro.titulo}' ha sido registrado exitosamente."
 
