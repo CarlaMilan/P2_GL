@@ -7,7 +7,7 @@ class LibraryDataVisualizer:
     def __init__(self, db_path):
         self.conn = sqlite3.connect(db_path)
 
-    def get_genre_most_read_by_user(self, user_id):
+    def generos_mas_leidos(self, user_id):
         query = f'''
         SELECT books.genre, COUNT(*) as count
         FROM readings
@@ -19,7 +19,7 @@ class LibraryDataVisualizer:
         '''
         return pd.read_sql_query(query, self.conn)
 
-    def get_books_read_per_month(self, user_id):
+    def libros_leidos_mes(self, user_id):
         query = f'''
         SELECT strftime('%Y-%m', readings.date) as month, COUNT(*) as count
         FROM readings
@@ -29,7 +29,7 @@ class LibraryDataVisualizer:
         '''
         return pd.read_sql_query(query, self.conn)
 
-    def get_book_ratings_distribution(self):
+    def ranking_valoracion(self):
         query = '''
         SELECT books.rating, COUNT(*) as count
         FROM books
@@ -38,8 +38,8 @@ class LibraryDataVisualizer:
         '''
         return pd.read_sql_query(query, self.conn)
 
-    def plot_genre_most_read_by_user(self, user_id):
-        genre_data = self.get_genre_most_read_by_user(user_id)
+    def grafico_generos_mas_leido(self, user_id):
+        genre_data = self.generos_mas_leidos(user_id)
         plt.figure(figsize=(10, 6))
         plt.bar(genre_data['genre'], genre_data['count'], color='skyblue')
         plt.xlabel('Género')
@@ -47,8 +47,8 @@ class LibraryDataVisualizer:
         plt.title('Género más leído por la persona')
         plt.show()
 
-    def plot_books_read_per_month(self, user_id):
-        monthly_data = self.get_books_read_per_month(user_id)
+    def grafico_libros_leidos_mes(self, user_id):
+        monthly_data = self.libros_leidos_mes(user_id)
         plt.figure(figsize=(10, 6))
         plt.plot(monthly_data['month'], monthly_data['count'], marker='o', linestyle='-', color='skyblue')
         plt.xlabel('Mes')
@@ -58,8 +58,8 @@ class LibraryDataVisualizer:
         plt.tight_layout()
         plt.show()
 
-    def plot_book_ratings_distribution(self):
-        rating_data = self.get_book_ratings_distribution()
+    def grafico_ranking_valoracion(self):
+        rating_data = self.ranking_valoracion()
         plt.figure(figsize=(10, 6))
         plt.bar(rating_data['rating'], rating_data['count'], color='skyblue')
         plt.xlabel('Valoración')
@@ -78,9 +78,9 @@ visualizer = LibraryDataVisualizer('biblioteca.db')
 user_id = 1
 
 # Generar las gráficas
-visualizer.plot_genre_most_read_by_user(user_id)
-visualizer.plot_books_read_per_month(user_id)
-visualizer.plot_book_ratings_distribution()
+visualizer.grafico_generos_mas_leidos(user_id)
+visualizer.grafico_libros_leidos_mes(user_id)
+visualizer.grafico_ranking_valoracion()
 
 # Cerrar la conexión a la base de datos
 visualizer.close_connection()
