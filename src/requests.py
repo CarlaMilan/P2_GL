@@ -5,7 +5,7 @@ try:
     conexion = sqlite3.connect('database/database.db') # Establecer conexión con bd
     cursor = conexion.cursor() # Crear cursor
     query = '''
-    PRAGMA table_info(comments)
+    PRAGMA table_info(books)
     '''
     cursor.execute(query)
     columns_info = cursor.fetchall()

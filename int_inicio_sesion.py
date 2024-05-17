@@ -1,18 +1,10 @@
-from usuarios import Usuario
 import tkinter as tk
 from tkinter import messagebox
-
-def iniciar_sesión():
-    usuario = entrada_usuario.get()
-    contraseña = entrada_contraseña.get()
-
-
-    # Verificar credenciales
-    validez = validación(usuario,contraseña) # Conseguir validación
-    if validez:
-        ventana_principal(usuario)
-    else:
-        messagebox.showerror("Error", "Credenciales incorrectas")
+import sqlite3
+from passlib.hash import argon2
+from usuarios_2 import Usuario
+import time
+from int_app_principal import FavBooksApp
 
 
 def registrar_usuario():
@@ -31,42 +23,41 @@ def registrar_usuario():
     entrada_contraseña_registro = tk.Entry(ventana_registro, show='*')
     entrada_contraseña_registro.grid(row=1, column=1, padx=10, pady=5)
 
+    def registrar():
+        username = entrada_usuario_registro.get()
+        password = entrada_contraseña_registro.get()
+        p = Usuario(username, password)
+        if p.register_user():
+            messagebox.showinfo("Registro Exitoso", "Usuario registrado exitosamente.")
+            ventana_registro.destroy()
+        else:
+            messagebox.showerror("Error", "El usuario ya existe.")
+
     # Botón para registrar usuario
-    boton_registro = tk.Button(ventana_registro, text="Registrar",
-                               command=lambda: registro(entrada_usuario_registro.get(),
-                                                        entrada_contraseña_registro.get()))
+    boton_registro = tk.Button(ventana_registro, text="Registrar", command=registrar)
     boton_registro.grid(row=2, columnspan=2, padx=10, pady=5)
 
 
-def registro(usuario, contraseña):
-    # Por ahora, simplemente muestra un mensaje indicando que el usuario ha sido registrado
+def iniciar_sesion():
+    usuario = entrada_usuario.get()
+    contraseña = entrada_contraseña.get()
     user = Usuario(usuario, contraseña)
-    comprobacion = user.registrar_usuario()
+    comprobacion = user.login_user()
     if comprobacion == 0:
-        messagebox.showinfo("Registro Exitoso", "Usuario registrado exitosamente.")
+        messagebox.showinfo("Usuario Inválido", "El usuario no existe")
     elif comprobacion == 1:
-        messagebox.showinfo("Usuario existente", "Ya existe el usuario. Por favor inicia sesión o cambia de usuario")
+        messagebox.showinfo("Credenciales inválidas", "La contraseña no es válida")
     else:
-        messagebox.showinfo("Usuario existente", "Las contraseñas están limitadas a carácteres unicode")
+        ventana_principal(usuario)
+        ventana_login.destroy()
 
-def validación(usuario, contraseña):
-    user = Usuario(usuario, contraseña)
-    comp = user.iniciar_sesion(usuario, contraseña)
-    if comp:
-        return True
-    else:
-        return False
 
-# Función mostrar ventana principal
+def obtener_hora():
+    hora_actual = time.strftime("%H:%M:%S")
+    return hora_actual
+
 def ventana_principal(usuario):
-    ventana_login.destroy()
-    ventana_principal = tk.Tk()
-    ventana_principal.title(f"Gestor de libros de {usuario}")
-    ventana_principal.configure(bg='#f0f0f0')
-    ventana_principal.geometry("400x300")
-    et_bienvenida = tk.Label(ventana_principal, text=f'BookTrail de {usuario}')
-    et_bienvenida.pack()
-    ventana_principal.mainloop()
+    FavBooksApp(usuario)
 
 ventana_login = tk.Tk()
 ventana_login.title("Inicio de sesión")
@@ -81,7 +72,7 @@ etiqueta_contraseña.grid(row=1, column=0, padx=10, pady=5)
 entrada_contraseña = tk.Entry(ventana_login, show='*')
 entrada_contraseña.grid(row=1, column=1, padx=10, pady=5)
 
-b_inicio_sesion = tk.Button(ventana_login, text='Iniciar sesión', command=iniciar_sesión)
+b_inicio_sesion = tk.Button(ventana_login, text='Iniciar sesión', command=iniciar_sesion)
 b_inicio_sesion.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
 
 b_registro = tk.Button(ventana_login, text='Registrarse', command=registrar_usuario)
