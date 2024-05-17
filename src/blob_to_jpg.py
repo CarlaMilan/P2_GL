@@ -26,7 +26,7 @@ ventana.geometry("500x500")
 ventana.title("Mostrar Imagen desde BLOB en SQLite")
 
 # Conectar a la base de datos SQLite
-conexion = sqlite3.connect('src/database/database.db')
+conexion = sqlite3.connect('database/database.db')
 
 # Obtener el BLOB desde la base de datos
 titulo_libro = "Hábitos atómicos"  # Título del libro cuya imagen deseas mostrar

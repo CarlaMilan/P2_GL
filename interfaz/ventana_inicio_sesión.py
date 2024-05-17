@@ -2,9 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 from passlib.hash import argon2
-from usuarios_2 import Usuario
+from src.database.users_repository import UsersRepository as Usuario
 import time
-from int_app_principal import FavBooksApp
+from ventana_principal import FavBooksApp
 
 
 def registrar_usuario():
@@ -48,8 +48,9 @@ def iniciar_sesion():
     elif comprobacion == 1:
         messagebox.showinfo("Credenciales inválidas", "La contraseña no es válida")
     else:
-        ventana_principal(usuario)
         ventana_login.destroy()
+        ventana_principal(usuario)
+
 
 
 def obtener_hora():

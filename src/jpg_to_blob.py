@@ -13,7 +13,7 @@ def actualizar_imagen_libro(conexion, titulo, ruta_imagen):
     conexion.commit()
 
 # Conectar a la base de datos SQLite
-conexion = sqlite3.connect('src/database/database.db')
+conexion = sqlite3.connect('database/database.db')
 
 # Actualizar la imagen de un libro existente
 actualizar_imagen_libro(conexion, "Hábitos atómicos", "images/hatomicos.jpg")
