@@ -9,34 +9,40 @@ class LibraryDataVisualizer:
 
     def generos_mas_leidos(self, user_id):
         query = f'''
-        SELECT books.genre, COUNT(*) as count
-        FROM readings
-        JOIN books ON readings.book_id = books.id
-        WHERE readings.user_id = {user_id}
+        SELECT books.genre AS genre, COUNT(*) as count
+        FROM read_books
+        JOIN books ON read_books.book_id = books.book_id
+        WHERE read_books.user_id = {user_id}
         GROUP BY books.genre
         ORDER BY count DESC
         LIMIT 1;
         '''
-        return pd.read_sql_query(query, self.conn)
+        result = pd.read_sql_query(query, self.conn)
+        print("Generos más leídos:", result)
+        return result
 
     def libros_leidos_mes(self, user_id):
         query = f'''
-        SELECT strftime('%Y-%m', readings.date) as month, COUNT(*) as count
-        FROM readings
-        WHERE readings.user_id = {user_id}
+        SELECT strftime('%Y-%m', read_books.started_at) as month, COUNT(*) as count
+        FROM read_books
+        WHERE read_books.user_id = {user_id}
         GROUP BY month
         ORDER BY month;
         '''
-        return pd.read_sql_query(query, self.conn)
+        result = pd.read_sql_query(query, self.conn)
+        print("Libros leídos por mes:", result)
+        return result
 
     def ranking_valoracion(self):
         query = '''
-        SELECT books.rating, COUNT(*) as count
-        FROM books
-        GROUP BY books.rating
-        ORDER BY books.rating;
+        SELECT read_books.rating, COUNT(*) as count
+        FROM read_books
+        GROUP BY read_books.rating
+        ORDER BY read_books.rating;
         '''
-        return pd.read_sql_query(query, self.conn)
+        result = pd.read_sql_query(query, self.conn)
+        print("Ranking de valoración:", result)
+        return result
 
     def grafico_generos_mas_leido(self, user_id):
         genre_data = self.generos_mas_leidos(user_id)
@@ -72,16 +78,17 @@ class LibraryDataVisualizer:
 
 
 # Uso de la clase LibraryDataVisualizer
-visualizer = LibraryDataVisualizer('biblioteca.db')
+visualizer = LibraryDataVisualizer('src/database/database.db')
 
 # ID del usuario para el que queremos generar las gráficas
-user_id = 1
+user_id = 3
 
 # Generar las gráficas
-visualizer.grafico_generos_mas_leidos(user_id)
-visualizer.grafico_libros_leidos_mes(user_id)
-visualizer.grafico_ranking_valoracion()
+visualizer.grafico_generos_mas_leido(user_id)
+# visualizer.grafico_libros_leidos_mes(user_id)
+# visualizer.grafico_ranking_valoracion()
 
 # Cerrar la conexión a la base de datos
 visualizer.close_connection()
+
 
