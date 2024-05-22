@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 import os
 
 class ReadBooksRepository:
@@ -34,7 +35,23 @@ class ReadBooksRepository:
             return False
         finally:
             conn.close()
-
+    @staticmethod
+    def start_reading(user_id,book_id):
+        conn = ReadBooksRepository.connect()
+        cursor = conn.cursor()
+        started_at = datetime.now()
+        try:
+            cursor.execute('''
+                INSERT INTO read_books (user_id, book_id, started_at) 
+                VALUES (?, ?, ?)
+            ''', (user_id, book_id, started_at))
+            conn.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print("Error al leer libro:", e)
+            return False
+        finally:
+            conn.close()
     @staticmethod
     def get_user_reading(user_id):
         """
@@ -45,7 +62,7 @@ class ReadBooksRepository:
         conn = ReadBooksRepository.connect()
         cursor = conn.cursor()
         try:
-            cursor.execute('SELECT book_id FROM read_books WHERE user_id=? AND finished_at=None', (user_id,))
+            cursor.execute('SELECT book_id FROM read_books WHERE user_id=?', (user_id,))
             books = cursor.fetchall()
             return books
         finally:
