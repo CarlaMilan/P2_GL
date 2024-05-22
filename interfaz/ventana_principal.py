@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from functools import partial  # Para pasar argumentos a funciones de callback
 from src.database.books_repository import BooksRepository
+from src.database.fav_books_repository import FavBooksRepository
 from dominio.favbooks import FavBooks
 from src.database.users_repository import UsersRepository
 import time
@@ -12,7 +13,7 @@ class FavBooksApp:
 
         self.ventana_principal = tk.Tk()
         self.ventana_principal.title(f"FavBook de {self.usuario}")
-
+        self.ventana_principal.iconbitmap('logo.ico')
         # Dimensiones y posición para centrar la ventana en la pantalla
         ancho_ventana = 1000
         alto_ventana = 800
@@ -36,25 +37,58 @@ class FavBooksApp:
         boton_buscador.pack(pady=10)
 
         # Sección de libros recomendados
-        self.seccion_recomendados = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE)
-        self.seccion_recomendados.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.seccion_recomendados = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE, height= 180)
+        self.seccion_recomendados.pack_propagate(False)
+        self.seccion_recomendados.pack(fill=tk.BOTH, padx=10, pady=10)
 
         self.et_recomendados = tk.Label(self.seccion_recomendados, text="Libros Recomendados", font=('Trebuchet MS', 14))
+        self.librrec = tk.Label(self.seccion_recomendados, text=f"mover eje x", font=('Trebuchet MS', 14))
+        self.librrec.place(x=800, y = 10)
+
         self.et_recomendados.pack(pady=5)
 
         # Sección de lista de favoritos
-        self.seccion_favoritos = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE)
-        self.seccion_favoritos.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.seccion_favoritos = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE, height= 190)
+        self.seccion_favoritos.pack_propagate(False)
+        self.seccion_favoritos.pack(fill=tk.BOTH, padx=10, pady=5)
 
         self.et_favoritos = tk.Label(self.seccion_favoritos, text="Lista de Favoritos", font=('Trebuchet MS', 14))
         self.et_favoritos.pack(pady=5)
 
         # Sección de lista de leídos
-        self.seccion_leidos = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE)
-        self.seccion_leidos.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.seccion_leidos = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE, height=180)
+        self.seccion_leidos.pack_propagate(False)
+        self.seccion_leidos.pack(fill=tk.BOTH, padx=10, pady=10)
 
         self.et_leidos = tk.Label(self.seccion_leidos, text="Lista de Leídos", font=('Trebuchet MS', 14))
         self.et_leidos.pack(pady=5)
+
+        us = UsersRepository.search_user(self.usuario)
+        favs = FavBooksRepository.get_user_favs(us[0])
+        print(favs)
+        ids = []
+        for id in favs:
+            ids.append(id[0])
+        librosfavs = BooksRepository.get_books_by_ids(ids)  # Tenemos los libros favoritos del usuario
+        counter = 0
+        varpos = 0
+        varps = 0
+        for librofav in librosfavs:
+            if counter < 4:
+                self.librofav = tk.Label(self.seccion_favoritos, text=f"{librofav[0]}", font=('Trebuchet MS', 14))
+                self.librofav.pack(pady=1)
+            elif 4 <= counter < 8:
+                self.librofav = tk.Label(self.seccion_favoritos, text=f"{librofav[0]}", font=('Trebuchet MS', 14))
+                self.librofav.place(x=10, y=33 + varpos)
+                varpos += 40
+            elif counter >= 8:
+                self.librofav = tk.Label(self.seccion_favoritos, text=f"{librofav[0]}", font=('Trebuchet MS', 14))
+                self.librofav.place(x=800, y=33+varps)
+                varps += 40
+
+            counter += 1
+
+        print(str(librosfavs))
 
         self.actualizar_hora()
 
@@ -73,7 +107,7 @@ class FavBooksApp:
         # Crear una nueva ventana para el buscador
         ventana_buscador = tk.Toplevel(self.ventana_principal)
         ventana_buscador.title("Buscar Libro")
-
+        ventana_buscador.iconbitmap('logo.ico')
         # Campo de entrada para el título del libro
         label_titulo = tk.Label(ventana_buscador, text="Título del libro:")
         label_titulo.pack()
@@ -98,6 +132,7 @@ class FavBooksApp:
             if resultados:
                 ventana_resultados = tk.Toplevel(ventana_buscador)
                 ventana_resultados.title("Resultados de la búsqueda")
+                ventana_resultados.iconbitmap('logo.ico')
 
                 # Crear una etiqueta para mostrar los resultados
                 etiqueta_resultados = tk.Label(ventana_resultados, text="Resultados de la búsqueda:")
@@ -112,15 +147,22 @@ class FavBooksApp:
                     # Botón para marcar como favorito
                     boton_favorito = tk.Button(ventana_resultados, text="Marcar como Favorito",
                                                command=lambda libro=libro: self.marcar_favorito(libro))
+
                     boton_favorito.pack()
             else:
                 messagebox.showinfo("Búsqueda", "No se encontraron resultados para el título proporcionado.")
 
     def marcar_favorito(self, libro):
+        libro = list(libro)
+        print(libro[0])
         us = UsersRepository.search_user(self.usuario) # Obtener id usuario actual
-        ins = FavBooks(us, libro[0][0])
-        try:
-            ins.save() # Guadrar en favoritos
-            messagebox.showinfo("Añadido a favorito")
-        except Exception as e:
-            messagebox.showerror("Error")
+        print(us)
+        ins = FavBooks(us[0], libro[0])
+        #try:
+        ins.save() # Guardar en favoritos
+        messagebox.showinfo("Añadido a favorito")
+        #except Exception as e:
+            #messagebox.showerror("Error")
+
+    def recomendar_libros(self):
+        pass
