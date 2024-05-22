@@ -35,3 +35,17 @@ class BooksRepository:
         finally:
             conn.close()
 
+    @staticmethod
+    def get_all_books():
+        """
+        Recupera todos los libros de la base de datos.
+        :return: list of tuples - Lista de libros.
+        """
+        conn = BooksRepository.connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute('SELECT title, author, genre, publication_date FROM books')
+            books = cursor.fetchall()
+            return books
+        finally:
+            conn.close()
