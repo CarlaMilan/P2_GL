@@ -10,6 +10,7 @@ from ventana_principal import FavBooksApp
 def registrar_usuario():
     ventana_registro = tk.Toplevel(ventana_login)
     ventana_registro.title("Registro de usuario")
+    ventana_registro.iconbitmap('logo.ico')
 
     # Etiqueta y entrada para el nombre de usuario
     etiqueta_usuario_registro = tk.Label(ventana_registro, text="Nuevo Usuario:")
@@ -62,7 +63,7 @@ def ventana_principal(usuario):
 
 ventana_login = tk.Tk()
 ventana_login.title("Inicio de sesión")
-
+ventana_login.iconbitmap('logo.ico')
 etiqueta_usuario = tk.Label(ventana_login, text="Usuario:")
 etiqueta_usuario.grid(row=0, column=0, padx=10, pady=5)
 entrada_usuario = tk.Entry(ventana_login)
