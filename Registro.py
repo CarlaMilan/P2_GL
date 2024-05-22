@@ -1,48 +1,37 @@
-import pandas as pd
-import json
+import sqlite3
+import os
 
+class BooksRepository:
+    db_path = os.path.join(os.path.dirname(__file__), 'database.db')
 
-class Libro:
-    def __init__(self, titulo, autor, genero, descripcion, editorial):
-        self.titulo = titulo
-        self.autor = autor
-        self.genero = genero
-        self.descripcion = descripcion
-        self.editorial = editorial
+    @staticmethod
+    def connect():
+        """Establece la conexión con la base de datos."""
+        return sqlite3.connect(BooksRepository.db_path)
 
+    @staticmethod
+    def add_book(title, author, genre, publication_date):
+        """
+        Añade un nuevo libro a la base de datos.
+        :param title: str - Título del libro.
+        :param author: str - Autor del libro.
+        :param genre: str - Género del libro.
+        :param publication_date: str - Fecha de publicación del libro.
+        :return: bool - True si el libro se añadió correctamente, False en caso contrario.
+        """
+        conn = BooksRepository.connect()
+        cursor = conn.cursor()
 
-class GestorLecturas:
-    def __init__(self, wishlist):
-        self.wishlist = [{'Titulo': '', 'Autor': '', 'Genero': '', 'Descripcion': '', 'Editorial': ''}]
-        with open('libros.txt', 'r') as archivo:
-                self.lista_libros = json.load(archivo)
-
-    def guardar_en_archivo(self):
-        # Guarda la lista de libros en el archivo de texto
-        with open('libros.txt', 'w') as archivo:
-            json.dump(self.wishlist, archivo)
-
-    def registrar_libro(self, libro):
-        with open('libros.txt', 'r') as archivo:
-            self.lista_libros = json.load(archivo)
-
-        # Agrega el nuevo libro a la lista de libros
-        if libro in self.lista_libros:
-            self.wishlist.append(self.libro)
-
-        else:
-            return f'El libro {libro.titulo} no esta disponible.'
-
-        # Guarda la lista de libros en el archivo de texto
-        self.guardar_en_archivo()
-
-        return f"El libro '{libro.titulo}' ha sido registrado correctamente."
-
-    def mostrar_libros(self):
-        # convierte la lista de libros en un DataFrame con Pandas para visualizarlo
-        df_libros = pd.DataFrame(self.wishlist)
-        return df_libros
-
-
-
+        try:
+            cursor.execute('''
+                    INSERT INTO books (title, author, genre, publication_date) 
+                    VALUES (?, ?, ?, ?)
+                ''', (title, author, genre, publication_date))
+            conn.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print("Error al añadir el libro:", e)
+            return False
+        finally:
+            conn.close()
 
