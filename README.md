@@ -14,7 +14,7 @@ Este proyecto incluye una aplicación de interfaz basada en Tkinter (Python) que
 # Instrucciones de despliegue
 ## 1. Instalar archivo requirements.txt.
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## 2. Despegar el programa en el fichero main.py: 
