@@ -62,6 +62,7 @@ def ventana_principal(usuario):
     FavBooksApp(usuario)
 
 ventana_login = tk.Tk()
+ventana_login.geometry('300x100+500+300')
 ventana_login.title("Inicio de sesión")
 ventana_login.iconbitmap('logo.ico')
 etiqueta_usuario = tk.Label(ventana_login, text="Usuario:")
