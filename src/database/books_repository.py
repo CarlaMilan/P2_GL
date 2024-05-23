@@ -112,7 +112,7 @@ class BooksRepository:
         cursor = conn.cursor()
 
         # Consulta SQL para seleccionar un libro aleatorio
-        cursor.execute("SELECT book_cover FROM libros ORDER BY RANDOM() LIMIT 1")
+        cursor.execute("SELECT title FROM books ORDER BY RANDOM() LIMIT 1")
 
         # Obtener el resultado de la consulta
         libro_aleatorio = cursor.fetchone()
