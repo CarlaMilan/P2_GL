@@ -46,6 +46,7 @@ class ReadBooksRepository:
                 VALUES (?, ?, ?)
             ''', (user_id, book_id, started_at))
             conn.commit()
+            print(' Leyendo... fncsql')
             return True
         except sqlite3.IntegrityError as e:
             print("Error al leer libro:", e)
