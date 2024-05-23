@@ -1,20 +1,15 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
-from tkinter import PhotoImage
+import os
 from PIL import Image, ImageTk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
-import pandas as pd
+from tkinter import messagebox
 from functools import partial  # Para pasar argumentos a funciones de callback
 from src.database.books_repository import BooksRepository
 from src.database.fav_books_repository import FavBooksRepository
-from src.database.stats_repository import LibraryDataVisualizer
 from dominio.favbooks import FavBooks
 from src.database.read_books_repository import ReadBooksRepository
 from src.database.users_repository import UsersRepository
+from src.database.stats_repository import LibraryDataVisualizer
 import time
-import os
 
 
 class FavBooksApp:
@@ -35,29 +30,30 @@ class FavBooksApp:
         # Configuración del color de fondo
         self.ventana_principal.configure(bg='#D19AFF')
 
+
         # Botón para abrir el buscador de libros
-        icono_busqueda = self.redimensionar_imagen('lupa.png', 3, 3)
-        boton_buscador = tk.Button(self.ventana_principal, text="Buscar Libro", image=icono_busqueda,
-                                   command=self.abrir_buscador, compound=tk.LEFT)
-        boton_buscador.pack(side=tk.LEFT, anchor=tk.NW, padx=10, pady=10)
+        boton_buscador = tk.Button(self.ventana_principal, text="Buscar Libro", command=self.abrir_buscador)
+        boton_buscador.pack(pady=10)
 
         # Etiqueta de bienvenida
-        self.et_bienvenida = tk.Label(self.ventana_principal, text=f'FavBook de {self.usuario}', font=('Trebuchet MS', 18), bg='#D19AFF')
+        self.et_bienvenida = tk.Label(self.ventana_principal, text=f'FavBook de {self.usuario}',
+                                      font=('Trebuchet MS', 18), bg='#D19AFF')
         self.et_bienvenida.pack(pady=10)
 
         # Etiqueta para mostrar la hora
         self.et_hora = tk.Label(self.ventana_principal, text=self.obtener_hora())
         self.et_hora.pack()
 
-        self.boton_frame = ttk.Frame(self.ventana_principal)
+        self.boton_frame = tk.Frame(self.ventana_principal)
         self.boton_frame.pack(fill=tk.BOTH, expand=True)
 
         # Crear un botón para mostrar el gráfico
-        self.boton_mostrar_grafico = ttk.Button(self.boton_frame, text="Libros leídos por género", command=self.mostrar_grafico)
+        self.boton_mostrar_grafico = tk.Button(self.boton_frame, text="Libros leídos por género",
+                                                command=self.mostrar_grafico)
         self.boton_mostrar_grafico.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
 
         # Crear un frame para el gráfico
-        self.frame_grafico = ttk.Frame(self.ventana_principal)
+        self.frame_grafico = tk.Frame(self.ventana_principal)
         self.frame_grafico.pack(fill=tk.BOTH, expand=True)
 
         # Crear instancia de LibraryDataVisualizer
@@ -65,15 +61,17 @@ class FavBooksApp:
         db_path = os.path.join(script_dir, '..', 'database', 'database.db')
         self.visualizer = LibraryDataVisualizer('db_path')
 
-
         # Sección de libros recomendados
         self.seccion_recomendados = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE, height=180)
         self.seccion_recomendados.pack_propagate(False)
         self.seccion_recomendados.pack(fill=tk.BOTH, padx=10, pady=10)
 
+        libros = self.recomendar_libros()
+        for librorec in libros:
+            self.librrec = tk.Label(self.seccion_recomendados, text=f"{librorec}", font=('Trebuchet MS', 14))
+            self.librrec.pack(padx=5, pady=5)
+
         self.et_recomendados = tk.Label(self.seccion_recomendados, text="Libros Recomendados", font=('Trebuchet MS', 14))
-        self.librrec = tk.Label(self.seccion_recomendados, text=f"mover eje x", font=('Trebuchet MS', 14))
-        self.librrec.place(x=800, y=10)
 
         self.et_recomendados.pack(pady=5)
 
@@ -86,6 +84,7 @@ class FavBooksApp:
         self.et_favoritos.pack(pady=5)
         us = UsersRepository.search_user(self.usuario)
         favs = FavBooksRepository.get_user_favs(us[0])
+        libro = BooksRepository.get_random_book_cover()
         ids = []
         for id in favs:
             ids.append(id[0])
@@ -113,7 +112,7 @@ class FavBooksApp:
         self.seccion_leidos.pack_propagate(False)
         self.seccion_leidos.pack(fill=tk.BOTH, padx=10, pady=10)
 
-        self.et_leidos = tk.Label(self.seccion_leidos, text="Lista de Leídos", font=('Trebuchet MS', 14))
+        self.et_leidos = tk.Label(self.seccion_leidos, text="Estás leyendo: ", font=('Trebuchet MS', 14))
         self.et_leidos.pack(pady=5)
 
         bdleidos = ReadBooksRepository.get_user_reading(us[0])
@@ -121,11 +120,22 @@ class FavBooksApp:
         for idlibro in bdleidos:
             librosids.append(idlibro[0])
         librosleidos = BooksRepository.get_books_by_ids(librosids) # Obtenemos los libros leidos por el usuario
-
+        counter0 = 0
+        varpos0 = 0
+        varps0 = 0
         for libroleido in librosleidos:
-            self.libroleido = tk.Label(self.seccion_leidos, text=f"{libroleido[0]}", font=('Trebuchet MS', 14))
-            self.libroleido.pack(pady=1)
-
+            if counter0 < 4:
+                self.libroleido = tk.Label(self.seccion_leidos, text=f"{libroleido[0]}", font=('Trebuchet MS', 14))
+                self.libroleido.pack(pady=1)
+            elif 4 <= counter0 < 8:
+                self.libroleido = tk.Label(self.seccion_leidos, text=f"{libroleido[0]}", font=('Trebuchet MS', 14))
+                self.libroleido.place(x=10, y=33 + varpos0)
+                varpos0 += 37
+            elif counter0 >= 8:
+                self.libroleido = tk.Label(self.seccion_leidos, text=f"{libroleido[0]}", font=('Trebuchet MS', 14))
+                self.libroleido.place(x=800, y=33 + varps0)
+                varps0 += 37
+            counter0 += 1
 
 
 
@@ -189,16 +199,16 @@ class FavBooksApp:
                     # Crear una etiqueta para mostrar el resultado
                     etiqueta_libro = tk.Label(ventana_resultados, text=libro)
                     etiqueta_libro.pack()
-                    print(libro)
                     # Botón para marcar como favorito
                     boton_favorito = tk.Button(ventana_resultados, text="Marcar como Favorito",
                                                command=lambda libro=libro: self.marcar_favorito(libro))
                     boton_favorito.pack()
-                    #if no esta leyendolo ya ( mirar BD )
                     global bookid
                     bookid = libro[0]
+                    global userid
+                    userid = UsersRepository.search_user(self.usuario)[0]
                     boton_empezarlibro = tk.Button(ventana_resultados, text="Leer",
-                                                   command=lambda bookid=bookid: self.empezar_lectura)
+                                                   command=lambda userid=userid, bookid=bookid: self.empezar_lectura(userid, bookid))
                     boton_empezarlibro.pack()
 
             else:
@@ -218,9 +228,7 @@ class FavBooksApp:
 
     def marcar_favorito(self, libro):
         libro = list(libro)
-        print(libro[0])
         us = UsersRepository.search_user(self.usuario) # Obtener id usuario actual
-        print(us)
         ins = FavBooks(us[0], libro[0])
         try:
             ins.save() # Guardar en favoritos
@@ -228,17 +236,18 @@ class FavBooksApp:
         except Exception as e:
             messagebox.showerror("Error")
 
-    def recomendar_libros(self):
-        pass
 
-    def empezar_lectura(self,userid, bookid):
-        userid = UsersRepository.search_user(self.usuario)[0]
-        bookid = bookid
+
+    def recomendar_libros(self):
+        libros = []
+        for i in range(0,3):
+            libro = BooksRepository.get_random_book_cover()
+            libros.append(libro[0])
+        return list(libros)
+
+    def empezar_lectura(self, userid, bookid):
         try:
             ReadBooksRepository.start_reading(userid, bookid)
             messagebox.showinfo("Leyendo...")
         except Exception as e:
             messagebox.showerror("Error")
-
-    def finalizar_lectura(self):
-        pass
