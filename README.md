@@ -18,7 +18,7 @@ pip install requirements.txt
 ```
 
 ## 2. Despegar el programa en el fichero main.py: 
-### interfaz > main.py
+* ```interfaz > main.py```
 
 
 
