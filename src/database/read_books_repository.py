@@ -61,7 +61,7 @@ class ReadBooksRepository:
         conn = ReadBooksRepository.connect()
         cursor = conn.cursor()
         try:
-            cursor.execute('SELECT * FROM read_books WHERE user_id=?AND finished_at IS NOT NULL', (user_id,))
+            cursor.execute('SELECT book_id FROM read_books WHERE user_id=?AND finished_at IS NOT NULL', (user_id,))
             books = cursor.fetchall()
             return books
         finally:

@@ -1,11 +1,19 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+import pandas as pd
 from functools import partial  # Para pasar argumentos a funciones de callback
 from src.database.books_repository import BooksRepository
 from src.database.fav_books_repository import FavBooksRepository
+from src.database.stats_repository import LibraryDataVisualizer
 from dominio.favbooks import FavBooks
 from src.database.users_repository import UsersRepository
 import time
+import os
 
 class FavBooksApp:
     def __init__(self, usuario):
@@ -24,6 +32,12 @@ class FavBooksApp:
         # Configuración del color de fondo
         self.ventana_principal.configure(bg='#D19AFF')
 
+        # Botón para abrir el buscador de libros
+        icono_busqueda = self.redimensionar_imagen('lupa.png', 3, 3)
+        boton_buscador = tk.Button(self.ventana_principal, text="Buscar Libro", image=icono_busqueda,
+                                   command=self.abrir_buscador, compound=tk.LEFT)
+        boton_buscador.pack(side=tk.LEFT, anchor=tk.NW, padx=10, pady=10)
+
         # Etiqueta de bienvenida
         self.et_bienvenida = tk.Label(self.ventana_principal, text=f'FavBook de {self.usuario}', font=('Trebuchet MS', 18), bg='#D19AFF')
         self.et_bienvenida.pack(pady=10)
@@ -32,9 +46,22 @@ class FavBooksApp:
         self.et_hora = tk.Label(self.ventana_principal, text=self.obtener_hora())
         self.et_hora.pack()
 
-        # Botón para abrir el buscador de libros
-        boton_buscador = tk.Button(self.ventana_principal, text="Buscar Libro", command=self.abrir_buscador)
-        boton_buscador.pack(pady=10)
+        self.boton_frame = ttk.Frame(self.ventana_principal)
+        self.boton_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Crear un botón para mostrar el gráfico
+        self.boton_mostrar_grafico = ttk.Button(self.boton_frame, text="Libros leídos por género", command=self.mostrar_grafico)
+        self.boton_mostrar_grafico.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
+
+        # Crear un frame para el gráfico
+        self.frame_grafico = ttk.Frame(self.ventana_principal)
+        self.frame_grafico.pack(fill=tk.BOTH, expand=True)
+
+        # Crear instancia de LibraryDataVisualizer
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener ruta absoluta archivo actual
+        db_path = os.path.join(script_dir, '..', 'database', 'database.db')
+        self.visualizer = LibraryDataVisualizer('db_path')
+
 
         # Sección de libros recomendados
         self.seccion_recomendados = tk.Frame(self.ventana_principal, bg='#FFFFFF', bd=1, relief=tk.GROOVE, height= 180)
@@ -121,6 +148,13 @@ class FavBooksApp:
         boton_buscar = tk.Button(ventana_buscador, text="Buscar", command=buscar_libro)
         boton_buscar.pack()
 
+    def mostrar_grafico(self):
+        user_id = UsersRepository.search_user(self.usuario)
+        user_id = user_id[0]
+        v = LibraryDataVisualizer.visualizer()
+        # Llamar a la función para mostrar el gráfico
+        v.grafico_generos_mas_leidos(user_id=user_id, frame=self.frame_grafico)
+
     def buscar_libro(self, entry_titulo, ventana_buscador):
         # Obtener el título ingresado por el usuario
         titulo = entry_titulo.get()
@@ -151,6 +185,18 @@ class FavBooksApp:
                     boton_favorito.pack()
             else:
                 messagebox.showinfo("Búsqueda", "No se encontraron resultados para el título proporcionado.")
+
+    def redimensionar_imagen(self, file, size1, size2):
+        imagen_original = Image.open(file)
+
+        # Redimensiona la imagen a un tamaño específico
+        nuevo_ancho = size1  # Ancho deseado
+        nuevo_alto = size2  # Alto deseado
+        imagen_original.thumbnail((nuevo_ancho, nuevo_alto))
+
+        # Convierte la imagen redimensionada a un objeto PhotoImage de tkinter
+        icono_redimensionado = ImageTk.PhotoImage(imagen_original)
+        return icono_redimensionado
 
     def marcar_favorito(self, libro):
         libro = list(libro)
